@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acerto o Alvo</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #141e30, #243b55);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 800px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 42px;
+      margin-bottom: 20px;
+    }
+
+    .painel {
+      background: rgba(255,255,255,0.12);
+      padding: 15px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 15px;
+    }
+
+    #jogo {
+      position: relative;
+      width: 100%;
+      height: 450px;
+      background: #f4f4f4;
+      border-radius: 15px;
+      overflow: hidden;
+      border: 4px solid white;
+    }
+
+    #alvo {
+      position: absolute;
+      width: 55px;
+      height: 55px;
+      background: #e63946;
+      border: 6px solid white;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    }
+
+    #alvo::after {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 14px 30px;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background: #00b4d8;
+      color: white;
+    }
+
+    #mensagem {
+      margin-top: 15px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>🎯 Acerte o Alvo</h1>
+
+    <div class="painel">
+      <span>Pontos: <strong id="pontos">0</strong></span>
+      <span>Tempo: <strong id="tempo">30</strong></span>
+      <span>Recorde: <strong id="recorde">0</strong></span>
+    </div>
+
+    <div id="jogo">
+      <div id="alvo"></div>
+    </div>
+
+    <button id="iniciar">Iniciar Jogo</button>
+
+    <div id="mensagem"></div>
+  </div>
+
+  <script>
+    const alvo = document.getElementById("alvo");
+    const jogo = document.getElementById("jogo");
+    const pontosTexto = document.getElementById("pontos");
+    const tempoTexto = document.getElementById("tempo");
+    const recordeTexto = document.getElementById("recorde");
+    const botao = document.getElementById("iniciar");
+    const mensagem = document.getElementById("mensagem");
+
+    let pontos = 0;
+    let tempo = 30;
+    let intervalo;
+    let jogando = false;
+
+    let recorde = Number(localStorage.getItem("recorde")) || 0;
+    recordeTexto.textContent = recorde;
+
+    function moverAlvo() {
+      const larguraMaxima = jogo.clientWidth - alvo.offsetWidth;
+      const alturaMaxima = jogo.clientHeight - alvo.offsetHeight;
+
+      const x = Math.random() * larguraMaxima;
+      const y = Math.random() * alturaMaxima;
+
+      alvo.style.left = `${x}px`;
+      alvo.style.top = `${y}px`;
+      alvo.style.display = "block";
+    }
+
+    function iniciarJogo() {
+      pontos = 0;
+      tempo = 30;
+      jogando = true;
+
+      pontosTexto.textContent = pontos;
+      tempoTexto.textContent = tempo;
+      mensagem.textContent = "";
+      botao.disabled = true;
+
+      moverAlvo();
+
+      clearInterval(intervalo);
+
+      intervalo = setInterval(() => {
+        tempo--;
+        tempoTexto.textContent = tempo;
+
+        if (tempo <= 0) {
+          finalizarJogo();
+        }
+      }, 1000);
+    }
+
+    function finalizarJogo() {
+      jogando = false;
+      clearInterval(intervalo);
+      botao.disabled = false;
+      alvo.style.display = "none";
+
+      if (pontos > recorde) {
+        recorde = pontos;
+        localStorage.setItem("recorde", recorde);
+        recordeTexto.textContent = recorde;
+        mensagem.textContent = "🎉 Novo recorde!";
+      } else {
+        mensagem.textContent = "⏰ Fim de jogo!";
+      }
+    }
+
+    alvo.addEventListener("click", () => {
+      if (!jogando) return;
+
+      pontos++;
+      pontosTexto.textContent = pontos;
+      moverAlvo();
+    });
+
+    botao.addEventListener("click", iniciarJogo);
+  </script>
+
+</body>
+</html>
